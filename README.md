@@ -1,4 +1,4 @@
-# Graph_Triangle_Counter
+# Benchmark on Sequential and Parallel Graph Triangle Counter Problem
 Comparison between Sequential and Parallel version of the Graph Triangle Counter problem.
 
 ## Startup
