@@ -13,6 +13,8 @@
 #include <ctime>
 #include <string>
 #include <sstream>
+#include <filesystem>
+#include <cstdio>
 
 using namespace std;
 
@@ -26,14 +28,14 @@ using EdgeList = vector<pair<int, int>>;
 
 
 size_t intersectionLength(vector<int>* v1, vector<int>* v2)
-{   
+{
     vector<int> intersection;
     set_intersection((*v1).begin(), (*v1).end(), (*v2).begin(), (*v2).end(), back_inserter(intersection));
     return intersection.size();
 }
 
 
-size_t TriangleCount(EdgeList *edge_list, AdjacentList *adjacent_list, int start, int skip) { //vector<bool>* sorted
+size_t TriangleCount(EdgeList* edge_list, AdjacentList* adjacent_list, int start, int skip) { //vector<bool>* sorted
     size_t sum = 0;
     for (int i = start; i < (*edge_list).size(); i += skip) {
         sum += intersectionLength(&(*adjacent_list)[(*edge_list)[i].first], &(*adjacent_list)[(*edge_list)[i].second]);
@@ -43,60 +45,69 @@ size_t TriangleCount(EdgeList *edge_list, AdjacentList *adjacent_list, int start
 
 
 void GenerateAndWriteRandomGraph(int n_vertices, int n_edges) {
-	string name = "V_" +to_string(n_vertices) + "-E_" + to_string(n_edges);
+    string name = "V_" + to_string(n_vertices) + "-E_" + to_string(n_edges);
     int first, second;
-	vector<pair<int, int>> edges(n_edges);
+    vector<pair<int, int>> edges(n_edges);
 
-	ofstream graph;
-    graph.open ("../datasets/random_graphs/"+name+".csv");
+    ofstream graph;
+    graph.open("./datasets/random_graphs/" + name + ".csv");
 
-    Distribution random_vertes(0, n_vertices-1);
+    Distribution random_vertes(0, n_vertices - 1);
+
+    cout << "Generating a random undirected graph with " << n_vertices << " vertices and " << n_edges << " edges ...";
 
     for (int edge = 0; edge < n_edges; ++edge) {
         do {
-			first = random_vertes(prng);
+            first = random_vertes(prng);
             second = random_vertes(prng);
         } while (first == second && edges.end() == find_if(edges.begin(), edges.end(),
-                [&first, &second](const pair<int, int>& element) { return element.first == first && element.second == second; })); // <-------------------- CONTROLLARE DUPLICATI 
+            [&first, &second](const pair<int, int>& element) { return element.first == first && element.second == second; })); // <-------------------- CONTROLLARE DUPLICATI 
 
-		edges.push_back(make_pair(first, second));
+        edges.push_back(make_pair(first, second));
 
-		// added only once
         graph << first << "," << second << "\n";
 
-	}
-
-
-	/*while (edges.size() < n_edges) {
-        first = random_vertes(prng);
-        second = random_vertes(prng);
-        if (first == second)
-            continue; // ignore self-loops
-        //if (first > second) {
-            //swap(u, v); // make sure u < v
-        //}
-        if (find(edges.begin(), edges.end(), make_pair(first, second)) == edges.end()) {
-			graph << first << "," << second << "\n";
-            edges.push_back(make_pair(first, second)); // add the edge if it's not already present
-		}
-    }*/
+    }
 
     graph.close();
-
+    cout << " DONE\n";
 }
 
+
 string ReturnResultPath() {
-	stringstream results_path;
-	time_t curtime;
-    time(&curtime);
-    string ts = string(ctime(&curtime));
+    
+    stringstream results_path;
+
+    //time_t curtime;
+    //time(&curtime);
+    //string ts = string(ctime(&curtime));
+
+    time_t result = time(NULL);
+    char timestamp[26];
+    ctime_s(timestamp, sizeof timestamp, &result);
+    string ts = string(timestamp);
+
     ts.erase(remove(ts.begin(), ts.end(), '\n'), ts.cend());
 
     replace(ts.begin(), ts.end(), ' ', '_');
     replace(ts.begin(), ts.end(), ':', '.');
-    
-    results_path << "../results/results_" << ts << ".csv";
-	return results_path.str();
+
+    results_path << "./results/results_" << ts << ".csv";
+    return results_path.str();
+}
+
+
+void DeleteExistingDatasets(string path) {
+    for (const auto& entry : filesystem::directory_iterator(path)) {
+        if (entry.is_regular_file()) {
+            string path_name = entry.path().generic_string();
+            string name = path_name;
+            name.erase(name.begin(), name.begin() + 11);
+
+            if (name != ".gitignore")
+                remove(name.c_str());
+        }
+    }
 }
 
 

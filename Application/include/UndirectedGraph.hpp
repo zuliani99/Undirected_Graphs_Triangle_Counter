@@ -2,7 +2,6 @@
 #define _UG_H
 
 #include "Utils.hpp"
-#include <filesystem>
 #include <unordered_map>
 #include <future>
 
@@ -14,7 +13,6 @@ private:
     int n_edges = 0;
     int n_vertices = 0;
     double density = .0;
-    //vector<bool> sorted;
     unordered_map<int, double> speed_up;
     unordered_map<int, pair<Duration, size_t>> results;
 
@@ -27,7 +25,6 @@ public:
     void ParallelTriangleCounter(const int num_threads);
     void GetResultByThread(int thread);
     void WriteResultsCsv(string results_path);
-	//void WriteRandomGraph();
 
     UndirectedGraph() { }
 
@@ -78,59 +75,13 @@ public:
                 //this->adjacent_list[v2].insert(v1); // log(N)
             }
 
-            this->n_vertices = static_cast<int>(this->adjacent_list.size());   
+            this->n_vertices = static_cast<int>(this->adjacent_list.size());
 
-            //this->sorted = vector<bool>(this->n_vertices, false);
-            
             this->density = static_cast<double>((2 * this->n_edges) / (this->n_vertices * (this->n_vertices - 1)));
             cout << "  DONE\n";
         }
     }
-
-    /*UndirectedGraph(int n_vertices, int n_edges) {
-        this->n_vertices = n_vertices;
-        this->n_edges = n_edges;
-        this->name = to_string(n_vertices) + " " + to_string(n_edges);
-        int first, second;
-
-        Distribution random_vertes(0, this->n_vertices);
-
-        for (int edge = 0; edge < this->n_edges; ++edge) {
-            first = random_vertes(prng);
-            do {
-                second = random_vertes(prng);
-            } while (first == second && this->edge_list.end() == find_if(this->edge_list.begin(), this->edge_list.end(),
-                [&first, &second](const pair<int, int>& element) { return element.first == first && element.second == second; }));
-
-            this->edge_list.push_back(make_pair(first, second));
-
-			this->adjacent_list = AdjacentList(this->n_vertices);
-
-            auto it1 = upper_bound(this->adjacent_list[first].cbegin(), this->adjacent_list[first].cend(), second);
-            this->adjacent_list[first].insert(it1, second);
-
-            auto it2 = upper_bound(this->adjacent_list[second].cbegin(), this->adjacent_list[second].cend(), first);
-            this->adjacent_list[second].insert(it2, first);
-        }
-
-		this->WriteRandomGraph();
-
-    }
-	*/
-
 };
-
-
-/*template<class EdgeList, class AdjacentList>
-void UndirectedGraph<EdgeList, AdjacentList>::WriteRandomGraph() {
-	ofstream graph;
-    graph.open ("../datasets/random_graphs/"+this->name+".csv");
-	for(auto& edge : this->edge_list) {
-		graph << edge.first << "," << edge.second << "\n";
-	}
-    graph.close();
-}*/
-
 
 
 template<typename EdgeList, typename AdjacentList>
