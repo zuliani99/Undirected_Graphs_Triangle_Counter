@@ -44,13 +44,13 @@ size_t TriangleCount(EdgeList* edge_list, AdjacentList* adjacent_list, int start
 }
 
 
-void GenerateAndWriteRandomGraph(int n_vertices, int n_edges) {
+void GenerateAndWriteRandomGraph(string path, int n_vertices, int n_edges) {
     string name = "V_" + to_string(n_vertices) + "-E_" + to_string(n_edges);
     int first, second;
     vector<pair<int, int>> edges(n_edges);
 
     ofstream graph;
-    graph.open("./datasets/random_graphs/" + name + ".csv");
+    graph.open(path + "/" + name + ".csv");
 
     Distribution random_vertes(0, n_vertices - 1);
 
@@ -78,21 +78,21 @@ string ReturnResultPath() {
     
     stringstream results_path;
 
-    //time_t curtime;
-    //time(&curtime);
-    //string ts = string(ctime(&curtime));
+    time_t curtime;
+    time(&curtime);
+    string ts = string(ctime(&curtime));
 
-    time_t result = time(NULL);
-    char timestamp[26];
-    ctime_s(timestamp, sizeof timestamp, &result);
-    string ts = string(timestamp);
+    //time_t result = time(NULL);
+    //char timestamp[26];
+    //ctime_s(timestamp, sizeof timestamp, &result);
+    //string ts = string(timestamp);
 
     ts.erase(remove(ts.begin(), ts.end(), '\n'), ts.cend());
 
     replace(ts.begin(), ts.end(), ' ', '_');
     replace(ts.begin(), ts.end(), ':', '.');
 
-    results_path << "./results/results_" << ts << ".csv";
+    results_path << "../results/results_" << ts << ".csv";
     return results_path.str();
 }
 
@@ -102,10 +102,10 @@ void DeleteExistingDatasets(string path) {
         if (entry.is_regular_file()) {
             string path_name = entry.path().generic_string();
             string name = path_name;
-            name.erase(name.begin(), name.begin() + 11);
+            name.erase(name.begin(), name.begin() + 26);
 
             if (name != ".gitignore")
-                remove(name.c_str());
+                remove(path_name.c_str());
         }
     }
 }

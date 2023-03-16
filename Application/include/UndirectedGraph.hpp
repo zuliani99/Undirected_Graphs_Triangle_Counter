@@ -35,7 +35,7 @@ public:
             string line, word;
 
             this->name = entry.path().generic_string();
-            this->name.erase(this->name.begin(), this->name.begin() + 11);
+            //this->name.erase(this->name.begin(), this->name.begin() + 11);
 
             cout << "Reading file: " << this->name << " ...";
 

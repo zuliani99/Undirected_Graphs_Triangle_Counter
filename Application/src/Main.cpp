@@ -59,8 +59,8 @@ int main() {
             Distribution sparse_dist((random_n_vertices - 1), random_n_vertices * (random_n_vertices - 1) / 4);
             Distribution dense_dist((random_n_vertices * (random_n_vertices - 1) / 4) + 1, random_n_vertices * (random_n_vertices - 1) / 2);
 
-            GenerateAndWriteRandomGraph(random_n_vertices, sparse_dist(prng));
-            GenerateAndWriteRandomGraph(random_n_vertices, dense_dist(prng));
+            GenerateAndWriteRandomGraph(random_datasets_path, random_n_vertices, sparse_dist(prng));
+            GenerateAndWriteRandomGraph(random_datasets_path, random_n_vertices, dense_dist(prng));
 
         }
     }
