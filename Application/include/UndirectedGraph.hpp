@@ -4,6 +4,8 @@
 #include "Utils.hpp"
 #include <unordered_map>
 #include <future>
+#include <mutex>
+#include <omp.h>
 
 
 template<typename EdgeList, typename AdjacentList>
@@ -13,18 +15,20 @@ private:
     int n_edges = 0;
     int n_vertices = 0;
     double density = .0;
-    unordered_map<int, double> speed_up;
-    unordered_map<int, pair<Duration, size_t>> results;
+    unordered_map<int, Duration> elp_count;
+    unordered_map<int, Duration> elp_adj;
+    unordered_map<int, size_t> tri_count;
+
 
 public:
     EdgeList edge_list;
     AdjacentList adjacent_list;
 
     void printProprieties();
-    void SequentialTriangleCounter();
-    void ParallelTriangleCounter(const int num_threads);
+    void TriangleCounter(const int num_threads);
     void GetResultByThread(int thread);
     void WriteResultsCsv(string results_path);
+    void GetAdjacentList(const int num_threads);
 
     UndirectedGraph() { }
 
@@ -33,9 +37,10 @@ public:
 
             vector<string> row;
             string line, word;
+            vector<int> temp_vertices;
 
             this->name = entry.path().generic_string();
-            //this->name.erase(this->name.begin(), this->name.begin() + 11);
+            this->name.erase(this->name.begin(), this->name.begin() + 11);
 
             cout << "Reading file: " << this->name << " ...";
 
@@ -45,6 +50,7 @@ public:
 
             if (file.is_open()) {
                 while (getline(file, line)) {
+                    int first, second;
 
                     row.clear();
 
@@ -54,70 +60,26 @@ public:
                         row.push_back(word);
                     this->n_edges += 1;
 
-                    this->edge_list.push_back(make_pair(stoi(row[0]), stoi(row[1])));
+                    first = stoi(row[0]);
+                    second = stoi(row[1]);
+
+                    this->edge_list.push_back(make_pair(first, second));
+
+                    if (find(temp_vertices.begin(), temp_vertices.end(), first) == temp_vertices.end()) temp_vertices.push_back(first);
+                    if (find(temp_vertices.begin(), temp_vertices.end(), second) == temp_vertices.end()) temp_vertices.push_back(second);
+
                 }
             }
             file.close();
 
-            for (const auto& edge : this->edge_list) {
-                int v1 = edge.first;
-                int v2 = edge.second;
+            this->n_vertices = static_cast<int>(temp_vertices.size());
+            this->adjacent_list = AdjacentList(this->n_vertices);
 
-                auto it1 = std::upper_bound(this->adjacent_list[v1].cbegin(), this->adjacent_list[v1].cend(), v2);
-                this->adjacent_list[v1].insert(it1, v2);
-
-                auto it2 = std::upper_bound(this->adjacent_list[v2].cbegin(), this->adjacent_list[v2].cend(), v1);
-                this->adjacent_list[v2].insert(it2, v1);
-
-                //this->adjacent_list[v1].push_back(v2);
-                //this->adjacent_list[v2].push_back(v1);
-                //this->adjacent_list[v1].insert(v2); // log(N)
-                //this->adjacent_list[v2].insert(v1); // log(N)
-            }
-
-            this->n_vertices = static_cast<int>(this->adjacent_list.size());
-
-            this->density = static_cast<double>((2 * this->n_edges) / (this->n_vertices * (this->n_vertices - 1)));
             cout << "  DONE\n";
         }
     }
 };
 
-
-template<typename EdgeList, typename AdjacentList>
-inline void UndirectedGraph<EdgeList, AdjacentList>::SequentialTriangleCounter()
-{
-    size_t sum = 0;
-
-    auto start = now();
-    sum = TriangleCount(&this->edge_list, &this->adjacent_list, 0, 1); //&this->sorted,
-    auto end = now();
-
-    if (sum > 3) sum /= 3;
-
-    this->results[1] = make_pair((end - start), sum);
-}
-
-
-template<typename EdgeList, typename EdgesList>
-inline void UndirectedGraph<EdgeList, EdgesList>::ParallelTriangleCounter(int num_threads)
-{
-    vector<future<size_t>> futures(num_threads);
-    size_t sum = 0;
-
-    auto start = now();
-    for (int t = 0; t < num_threads; t++) {
-        futures[t] = async(launch::async, TriangleCount,
-            &this->edge_list, &this->adjacent_list, t, num_threads); //&this->sorted,
-    }
-    for (int t = 0; t < num_threads; t++) sum += futures[t].get();
-    auto end = now();
-
-    if (sum > 0) sum /= 3;
-
-    this->results[num_threads] = make_pair((end - start), sum);
-    this->speed_up[num_threads] = this->results[1].first.count() / this->results[num_threads].first.count();
-}
 
 
 template<typename EdgeList, typename AdjacentList>
@@ -128,21 +90,111 @@ inline void UndirectedGraph<EdgeList, AdjacentList>::printProprieties()
 
 
 template<typename EdgeList, typename AdjacentList>
+inline void UndirectedGraph<EdgeList, AdjacentList>::TriangleCounter(const int num_threads)
+{
+    size_t sum = 0;
+
+    auto start = now();
+
+    #pragma omp parallel for if(num_threads>1) num_threads(num_threads) reduction(+:sum)
+    for (int i = 0; i < this->n_edges; ++i) {
+        sum += intersectionLength(this->adjacent_list[this->edge_list[i].first], this->adjacent_list[this->edge_list[i].second]);
+    }
+
+    auto end = now();
+
+    if (sum > 3) sum /= 3;
+
+    this->elp_count[num_threads-1] = (end - start);
+    this->tri_count[num_threads-1] = sum;
+
+
+    //this->adjacent_list.clear();
+    //this->adjacent_list = AdjacentList(this->n_vertices);
+    AdjacentList().swap(this->adjacent_list);
+}
+
+
+template<typename EdgeList, typename AdjacentList>
 inline void UndirectedGraph<EdgeList, AdjacentList>::GetResultByThread(int thread)
 {
-    cout << "DONE -> " << fixed << "Triangle count: " << this->results[thread].second << " - Execution time : " << this->results[thread].first.count() << "ms - Speed Up: " << this->speed_up[thread] << "\n\n";
+    cout << "--- DONE ---\n" << fixed << "Triangle count: " << this->tri_count[thread] << " - Execution time : " << this->elp_count[thread].count() << "ms - Speed Up: " << this->elp_count[0].count() / this->elp_count[thread].count() <<
+        " - Adjacent List Generation Time: " << this->elp_adj[thread].count() << "ms - Speed Up: " << this->elp_adj[0].count() / this->elp_adj[thread].count() << "\n\n";
 }
 
 
 template<typename EdgeList, typename AdjacentList>
 inline void UndirectedGraph<EdgeList, AdjacentList>::WriteResultsCsv(string results_path)
 {
+
     ofstream stream;
     stream.open(results_path, std::ios::out | std::ios::app);
-    for (int i = 0; i < this->results.size() - 1; ++i)
-        stream << this->name << "," << this->n_edges << "," << this->n_vertices << "," << this->density << "," << (i + 1) << "," << this->results[i + 1].second << "," << this->results[i + 1].first.count() << "," << this->speed_up[i + 1] << "\n";
+    for (int i = 0; i < this->elp_count.size(); ++i) {
+                    //"name,             n_edges,                  n_vertices,            density,                threads
+        stream << this->name << "," << this->n_edges << "," << this->n_vertices << "," << this->density << "," << (i + 1) << "," <<
+            //    n_triangles,            elapsed_triangle_count,                           speed_up_traingle_count
+            this->tri_count[i] << "," << this->elp_count[i].count() << "," << this->elp_count[0].count() / this->elp_count[i].count() << "," <<
+            //elapsed_adjacent_list,                         speed_up_adjacent_list\n";
+            this->elp_adj[i].count() << "," << this->elp_adj[0].count() / this->elp_adj[i].count() << "\n";
+
+    }
+        
 
     stream.close();
+}
+
+template<typename EdgeList, typename AdjacentList>
+inline void UndirectedGraph<EdgeList, AdjacentList>::GetAdjacentList(int num_threads)
+{
+    //vector<mutex> vtc_mutx(this->n_vertices);
+    vector<omp_lock_t> writelock(this->n_vertices);
+
+    for(auto& lock : writelock) 
+        omp_init_lock(&lock);
+
+    auto start = now();
+
+    //#pragma omp parallel for if(num_threads>1) num_threads(num_threads)
+    for (int i = 0; i < this->n_edges; i++) {
+        int v1 = this->edge_list[i].first;
+        int v2 = this->edge_list[i].second;
+
+        //mutx.lock();
+        if (num_threads > 1) {
+            omp_set_lock(&writelock[v1]);
+            omp_set_lock(&writelock[v2]);
+        }
+
+        //vtc_mutx[v1].lock();
+        //vtc_mutx[v2].lock();
+
+        auto it1 = upper_bound(this->adjacent_list[v1].cbegin(), this->adjacent_list[v1].cend(), v2);
+        this->adjacent_list[v1].insert(it1, v2);
+        
+        auto it2 = upper_bound(this->adjacent_list[v2].cbegin(), this->adjacent_list[v2].cend(), v1);
+        this->adjacent_list[v2].insert(it2, v1);
+
+        //vtc_mutx[v1].unlock();
+        //vtc_mutx[v2].unlock();
+
+        if (num_threads > 1) {
+            omp_unset_lock(&writelock[v1]);
+            omp_unset_lock(&writelock[v2]);
+        }
+
+        //mutx.unlock();
+        
+    }
+    auto end = now();
+
+    for (auto& lock : writelock)
+        omp_destroy_lock(&lock);
+
+    this->elp_adj[num_threads - 1] = (end - start);
+
+    this->density = static_cast<double>((2 * this->n_edges) / (this->n_vertices * (this->n_vertices - 1)));
+
+    
 }
 
 

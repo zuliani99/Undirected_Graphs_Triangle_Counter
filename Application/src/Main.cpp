@@ -2,6 +2,8 @@
 #include "../include/Utils.hpp"
 #include "../include/UndirectedGraph.hpp"
 
+constexpr auto MAX_THREADS = 20;
+
 void RunTriangleCounter(vector<UndirectedGraph<EdgeList, AdjacentList>> graphs_vector, string results_path) {
     for (auto& graph : graphs_vector) {
         cout << "\n";
@@ -9,13 +11,19 @@ void RunTriangleCounter(vector<UndirectedGraph<EdgeList, AdjacentList>> graphs_v
 
         cout << "Number of available cores: " << thread::hardware_concurrency() << "\n\n";
 
-        cout << "SEQUENTIAL EXECUTION ...\n";
-        graph.SequentialTriangleCounter();
-        graph.GetResultByThread(1);
+        //cout << "SEQUENTIAL EXECUTION ...\n";
+        //graph.GetAdjacentList(0);
+        //graph.SequentialTriangleCounter();
+        //graph.GetResultByThread(0);
 
-        for (int threads = 2; threads <= 20; threads++) { // untill 20 threads
-            cout << "PARALLEL EXECUTION WITH " << threads << " THREADS\n";
-            graph.ParallelTriangleCounter(threads);
+        for (int threads = 0; threads < MAX_THREADS; threads++) { // untill 20 threads
+
+            if (threads == 0)
+                cout << "SEQUENTIAL EXECUTION ...\n";
+            else 
+                cout << "PARALLEL EXECUTION WITH " << threads + 1 << " THREADS ...\n";
+            graph.GetAdjacentList(threads + 1);
+            graph.TriangleCounter(threads + 1);
             graph.GetResultByThread(threads);
         }
 
@@ -38,7 +46,7 @@ int main() {
 
     bool newer_graph = false;
 
-    cout << "Do you want to generate newer random graphs? (0/1)" << endl;
+    cout << "Do you want to generate newer random graphs? (0/1) ";
     cin >> newer_graph;
 
     if (newer_graph != 0 && newer_graph != 1)
@@ -69,7 +77,7 @@ int main() {
 
     fstream stream;
     stream.open(results_path, std::ios::out | std::ios::app);
-    stream << "name,n_edges,n_vertices,density,threads,n_triangles,elapsed,speed_up\n";
+    stream << "name,n_edges,n_vertices,density,threads,n_triangles,elapsed_triangle_count,speed_up_traingle_count,elapsed_adjacent_list,speed_up_adjacent_list\n";
     stream.close();
 
     RunGraphsraphs(random_datasets_path, results_path);

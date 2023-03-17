@@ -27,21 +27,26 @@ using AdjacentList = unordered_map<int, vector<int>>;
 using EdgeList = vector<pair<int, int>>;
 
 
-size_t intersectionLength(vector<int>* v1, vector<int>* v2)
+//size_t intersectionLength(vector<int>* v1, vector<int>* v2)
+
+size_t intersectionLength(vector<int>& v1, vector<int>& v2)
 {
     vector<int> intersection;
-    set_intersection((*v1).begin(), (*v1).end(), (*v2).begin(), (*v2).end(), back_inserter(intersection));
+    //set_intersection((*v1).begin(), (*v1).end(), (*v2).begin(), (*v2).end(), back_inserter(intersection));
+    set_intersection(v1.begin(), v1.end(), v2.begin(), v2.end(), back_inserter(intersection));
     return intersection.size();
 }
 
 
-size_t TriangleCount(EdgeList* edge_list, AdjacentList* adjacent_list, int start, int skip) { //vector<bool>* sorted
+/*size_t TriangleCount(EdgeList* edge_list, AdjacentList* adjacent_list, const int num_threads) {
     size_t sum = 0;
-    for (int i = start; i < (*edge_list).size(); i += skip) {
+
+    #pragma omp parallel for if(num_threads>0) num_threads(num_threads+1) reduction(+:sum)
+    for (int i = 0; i < (*edge_list).size(); ++i) {
         sum += intersectionLength(&(*adjacent_list)[(*edge_list)[i].first], &(*adjacent_list)[(*edge_list)[i].second]);
     }
     return sum;
-}
+}*/
 
 
 void GenerateAndWriteRandomGraph(string path, int n_vertices, int n_edges) {
@@ -61,12 +66,11 @@ void GenerateAndWriteRandomGraph(string path, int n_vertices, int n_edges) {
             first = random_vertes(prng);
             second = random_vertes(prng);
         } while (first == second && edges.end() == find_if(edges.begin(), edges.end(),
-            [&first, &second](const pair<int, int>& element) { return element.first == first && element.second == second; })); // <-------------------- CONTROLLARE DUPLICATI 
+            [&first, &second](const pair<int, int>& element) { return element.first == first && element.second == second; })); 
 
         edges.push_back(make_pair(first, second));
 
         graph << first << "," << second << "\n";
-
     }
 
     graph.close();
@@ -75,17 +79,17 @@ void GenerateAndWriteRandomGraph(string path, int n_vertices, int n_edges) {
 
 
 string ReturnResultPath() {
-    
+
     stringstream results_path;
 
-    time_t curtime;
+    /*time_t curtime;
     time(&curtime);
-    string ts = string(ctime(&curtime));
+    string ts = string(ctime(&curtime));*/
 
-    //time_t result = time(NULL);
-    //char timestamp[26];
-    //ctime_s(timestamp, sizeof timestamp, &result);
-    //string ts = string(timestamp);
+    time_t result = time(NULL);
+    char timestamp[26];
+    ctime_s(timestamp, sizeof timestamp, &result);
+    string ts = string(timestamp);
 
     ts.erase(remove(ts.begin(), ts.end(), '\n'), ts.cend());
 
