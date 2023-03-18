@@ -82,14 +82,14 @@ string ReturnResultPath() {
 
     stringstream results_path;
 
-    /*time_t curtime;
+    time_t curtime;
     time(&curtime);
-    string ts = string(ctime(&curtime));*/
+    string ts = string(ctime(&curtime));
 
-    time_t result = time(NULL);
+    /*time_t result = time(NULL);
     char timestamp[26];
     ctime_s(timestamp, sizeof timestamp, &result);
-    string ts = string(timestamp);
+    string ts = string(timestamp);*/
 
     ts.erase(remove(ts.begin(), ts.end(), '\n'), ts.cend());
 

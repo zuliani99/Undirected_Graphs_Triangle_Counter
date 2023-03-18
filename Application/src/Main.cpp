@@ -46,8 +46,8 @@ int main() {
 
     bool newer_graph = false;
 
-    cout << "Do you want to generate newer random graphs? (0/1) ";
-    cin >> newer_graph;
+    //cout << "Do you want to generate newer random graphs? (0/1) ";
+    //cin >> newer_graph;
 
     if (newer_graph != 0 && newer_graph != 1)
         throw std::invalid_argument("Please insert correct input");
@@ -80,7 +80,7 @@ int main() {
     stream << "name,n_edges,n_vertices,density,threads,n_triangles,elapsed_triangle_count,speed_up_traingle_count,elapsed_adjacent_list,speed_up_adjacent_list\n";
     stream.close();
 
-    RunGraphsraphs(random_datasets_path, results_path);
+    //RunGraphsraphs(random_datasets_path, results_path);
     RunGraphsraphs(standford_datasets_path, results_path);
 
     return 0;
