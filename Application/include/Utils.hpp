@@ -24,6 +24,7 @@ static std::mt19937 prng{ std::random_device{}() };
 using Distribution = std::uniform_int_distribution<int>;
 
 using AdjacentList = unordered_map<int, vector<int>>;
+using IncidenteMatrix = vector<vector<bool>>;
 using EdgeList = vector<pair<int, int>>;
 
 
@@ -32,6 +33,8 @@ using EdgeList = vector<pair<int, int>>;
 size_t intersectionLength(vector<int>& v1, vector<int>& v2)
 {
     vector<int> intersection;
+    //sort(v1.begin(), v1.end());
+    //sort(v2.begin(), v2.end());
     //set_intersection((*v1).begin(), (*v1).end(), (*v2).begin(), (*v2).end(), back_inserter(intersection));
     set_intersection(v1.begin(), v1.end(), v2.begin(), v2.end(), back_inserter(intersection));
     return intersection.size();
@@ -82,14 +85,14 @@ string ReturnResultPath() {
 
     stringstream results_path;
 
-    time_t curtime;
+    /*time_t curtime;
     time(&curtime);
-    string ts = string(ctime(&curtime));
+    string ts = string(ctime(&curtime));*/
 
-    /*time_t result = time(NULL);
+    time_t result = time(NULL);
     char timestamp[26];
     ctime_s(timestamp, sizeof timestamp, &result);
-    string ts = string(timestamp);*/
+    string ts = string(timestamp);
 
     ts.erase(remove(ts.begin(), ts.end(), '\n'), ts.cend());
 

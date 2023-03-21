@@ -22,8 +22,7 @@ void RunTriangleCounter(vector<UndirectedGraph<EdgeList, AdjacentList>> graphs_v
                 cout << "SEQUENTIAL EXECUTION ...\n";
             else 
                 cout << "PARALLEL EXECUTION WITH " << threads + 1 << " THREADS ...\n";
-            graph.GetAdjacentList(threads + 1);
-            graph.TriangleCounter(threads + 1);
+            graph.TriangleCounter(graph.GetAdjacentList(threads + 1), threads + 1);
             graph.GetResultByThread(threads);
         }
 
@@ -34,7 +33,7 @@ void RunTriangleCounter(vector<UndirectedGraph<EdgeList, AdjacentList>> graphs_v
 }
 
 
-void RunGraphsraphs(string path_datasets, string path_result) {
+void RunGraphs(string path_datasets, string path_result) {
     RunTriangleCounter(ReadFromDirectory(path_datasets), path_result);
 }
 
@@ -81,7 +80,7 @@ int main() {
     stream.close();
 
     //RunGraphsraphs(random_datasets_path, results_path);
-    RunGraphsraphs(standford_datasets_path, results_path);
+    RunGraphs(standford_datasets_path, results_path);
 
     return 0;
 }
