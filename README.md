@@ -12,12 +12,12 @@ sudo apt-get install libboost-all-dev
 After that, to compile the project, you have to jump into the */app/src* folder and type the following line in your console:
 
 ```
-g++ -std=c++2a -o ../bin/app Main.cpp
+g++ -std=c++2a -fopenmp -o ../bin/app Main.cpp
 ```
 
 For compier optimization instead type:
 ```
-g++ -std=c++2a -Ofast -o ../bin/app Main.cpp
+g++ -std=c++2a -fopenmp -Ofast -o ../bin/app Main.cpp
 ```
 
 The *.exe* file will be inserted into the */app/bin* directory.
