@@ -48,6 +48,8 @@ void GenerateAndWriteRandomGraph(string path, int n_vertices, int n_edges) {
 
     cout << "Generating a random undirected graph with " << n_vertices << " vertices and " << n_edges << " edges ...";
 
+	graph << n_vertices << "\n";
+
     for (int edge = 0; edge < n_edges; ++edge) {
         do {
             first = random_vertes(prng);

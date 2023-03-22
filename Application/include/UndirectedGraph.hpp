@@ -68,20 +68,6 @@ public:
 
 					n_row += 1;
 
-                    /*if (this->edge_list.end() == find_if(this->edge_list.begin(), this->edge_list.end(),
-                        [&first, &second](const pair<int, int>& element) { return element.first == second && element.second == first; })) {
-
-                        this->edge_list.push_back(make_pair(first, second));
-
-                        if (find(temp_vertices.begin(), temp_vertices.end(), first) == temp_vertices.end()) temp_vertices.push_back(first);
-                        if (find(temp_vertices.begin(), temp_vertices.end(), second) == temp_vertices.end()) temp_vertices.push_back(second);
-                    }*/
-
-
-                    //if (find(temp_vertices.begin(), temp_vertices.end(), first) == temp_vertices.end()) temp_vertices.push_back(first);
-                    //if (find(temp_vertices.begin(), temp_vertices.end(), second) == temp_vertices.end()) temp_vertices.push_back(second);
-                        
-
                 }
             }
             file.close();
