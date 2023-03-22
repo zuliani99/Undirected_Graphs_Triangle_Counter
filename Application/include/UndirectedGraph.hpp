@@ -36,7 +36,6 @@ public:
 
             vector<string> row;
             string line, word;
-            vector<int> temp_vertices;
             int n_row = 0;
 
             this->name = entry.path().generic_string();
@@ -65,10 +64,9 @@ public:
                         second = stoi(row[1]);
 
                         this->edge_list.push_back(make_pair(first, second));
-
                     }
 
-             
+					n_row += 1;
 
                     /*if (this->edge_list.end() == find_if(this->edge_list.begin(), this->edge_list.end(),
                         [&first, &second](const pair<int, int>& element) { return element.first == second && element.second == first; })) {
@@ -88,8 +86,7 @@ public:
             }
             file.close();
 
-            this->n_edges = n_row;
-            this->n_vertices = static_cast<int>(temp_vertices.size());
+            this->n_edges = n_row - 1;
             this->density = static_cast<double>((2 * this->n_edges)) / (this->n_vertices * (this->n_vertices - 1));
 
             cout << "  DONE\n";
