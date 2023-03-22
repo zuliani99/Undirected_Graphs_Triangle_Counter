@@ -7,7 +7,7 @@
 
 
 
-template<typename EdgeList, typename AdjacentList/*, typename IncidenteMatrix*/>
+template<typename EdgeList, typename AdjacentList>
 class UndirectedGraph {
 private:
     string name = "";
@@ -19,21 +19,15 @@ private:
     unordered_map<int, Duration> elp_adj;
     unordered_map<int, size_t> tri_count_adj;
 
-    unordered_map<int, Duration> elp_count_mat;
-    unordered_map<int, Duration> elp_mat;
-    unordered_map<int, size_t> tri_count_mat;
-
 
 public:
     EdgeList edge_list;
 
     void printProprieties();
     void TriangleCounter(AdjacentList adjacent_list, const int num_threads);
-    //void TriangleCounter(IncidenteMatrix incidente_matrix, const int num_threads);
     void GetResultByThread(const int thread);
     void WriteResultsCsv(string results_path);
     AdjacentList GetAdjacentList(const int num_threads);
-    //IncidenteMatrix GetIncidenteMatrix(const int num_threads);
 
     UndirectedGraph() { }
 
@@ -43,6 +37,7 @@ public:
             vector<string> row;
             string line, word;
             vector<int> temp_vertices;
+            int n_row = 0;
 
             this->name = entry.path().generic_string();
             this->name.erase(this->name.begin(), this->name.begin() + 11);
@@ -62,24 +57,40 @@ public:
 
                     while (getline(str, word, ','))
                         row.push_back(word);
-                    this->n_edges += 1;
+                    
+                    if (n_row == 0) {
+                        this->n_vertices = stoi(row[0]);
+                    } else {
+                        first = stoi(row[0]);
+                        second = stoi(row[1]);
 
-                    first = stoi(row[0]);
-                    second = stoi(row[1]);
+                        this->edge_list.push_back(make_pair(first, second));
 
-                    this->edge_list.push_back(make_pair(first, second));
+                    }
 
-                    if (find(temp_vertices.begin(), temp_vertices.end(), first) == temp_vertices.end()) temp_vertices.push_back(first);
-                    if (find(temp_vertices.begin(), temp_vertices.end(), second) == temp_vertices.end()) temp_vertices.push_back(second);
+             
+
+                    /*if (this->edge_list.end() == find_if(this->edge_list.begin(), this->edge_list.end(),
+                        [&first, &second](const pair<int, int>& element) { return element.first == second && element.second == first; })) {
+
+                        this->edge_list.push_back(make_pair(first, second));
+
+                        if (find(temp_vertices.begin(), temp_vertices.end(), first) == temp_vertices.end()) temp_vertices.push_back(first);
+                        if (find(temp_vertices.begin(), temp_vertices.end(), second) == temp_vertices.end()) temp_vertices.push_back(second);
+                    }*/
+
+
+                    //if (find(temp_vertices.begin(), temp_vertices.end(), first) == temp_vertices.end()) temp_vertices.push_back(first);
+                    //if (find(temp_vertices.begin(), temp_vertices.end(), second) == temp_vertices.end()) temp_vertices.push_back(second);
+                        
 
                 }
             }
             file.close();
 
+            this->n_edges = n_row;
             this->n_vertices = static_cast<int>(temp_vertices.size());
-            this->density = static_cast<double>((2 * this->n_edges) / (this->n_vertices * (this->n_vertices - 1))); // non la prende
-
-            //sort(this->edge_list.begin(), this->edge_list.end());
+            this->density = static_cast<double>((2 * this->n_edges)) / (this->n_vertices * (this->n_vertices - 1));
 
             cout << "  DONE\n";
         }
@@ -88,28 +99,27 @@ public:
 
 
 
-template<typename EdgeList, typename AdjacentList/*, typename IncidenteMatrix*/>
-inline void UndirectedGraph<EdgeList, AdjacentList/*, IncidenteMatrix*/>::printProprieties()
+template<typename EdgeList, typename AdjacentList>
+inline void UndirectedGraph<EdgeList, AdjacentList>::printProprieties()
 {
     cout << "Name: " << this->name << " - Number of Edges: " << this->n_edges << " - Number of vertices: " << this->n_vertices << endl << endl;
 }
 
 
-template<typename EdgeList, typename AdjacentList/*, typename IncidenteMatrix*/>
-inline void UndirectedGraph<EdgeList, AdjacentList/*, IncidenteMatrix*/>::TriangleCounter(AdjacentList adjacent_list, const int num_threads)
+template<typename EdgeList, typename AdjacentList>
+inline void UndirectedGraph<EdgeList, AdjacentList>::TriangleCounter(AdjacentList adjacent_list, const int num_threads)
 {
     size_t sum = 0;
 
     auto start = now();
 
 #pragma omp parallel for schedule(dynamic) if(num_threads>1) num_threads(num_threads) reduction(+:sum)
-    for (int i = 0; i < this->n_edges; ++i) {
+    for (int i = 0; i < this->n_edges; ++i)
         sum += intersectionLength(adjacent_list[this->edge_list[i].first], adjacent_list[this->edge_list[i].second]);
-    }
 
     auto end = now();
 
-    //if (sum > 3) sum /= 3;
+    if (sum > 3) sum /= 3;
 
     this->elp_count_adj[num_threads - 1] = (end - start);
     this->tri_count_adj[num_threads - 1] = sum;
@@ -117,42 +127,17 @@ inline void UndirectedGraph<EdgeList, AdjacentList/*, IncidenteMatrix*/>::Triang
 
 }
 
-/*template<typename EdgeList, typename AdjacentList, typename IncidenteMatrix>
-inline void UndirectedGraph<EdgeList, AdjacentList, IncidenteMatrix>::TriangleCounter(IncidenteMatrix incidente_matrix, const int num_threads)
-{
-    size_t sum = 0;
 
-    auto start = now();
-
-#pragma omp parallel for schedule(dynamic) if(num_threads>1) num_threads(num_threads) reduction(+:sum)
-    for (int i = 0; i < this->n_edges; ++i) {
-        int v1 = this->edge_list[i].first;
-        int v2 = this->edge_list[i].second;
-
-        for (int idx = 0; idx < this->n_vertices; ++idx)
-            if (incidente_matrix[v1][idx] == incidente_matrix[idx][v2] == true) sum += 1;
-
-    }
-
-    auto end = now();
-
-    if (sum > 3) sum /= 3;
-
-    this->elp_count_mat[num_threads - 1] = (end - start);
-    this->tri_count_mat[num_threads - 1] = sum;
-}*/
-
-
-template<typename EdgeList, typename AdjacentList/*, typename IncidenteMatrix*/>
-inline void UndirectedGraph<EdgeList, AdjacentList/*, IncidenteMatrix*/>::GetResultByThread(const int thread)
+template<typename EdgeList, typename AdjacentList>
+inline void UndirectedGraph<EdgeList, AdjacentList>::GetResultByThread(const int thread)
 {
     cout << "--- DONE ---\n" << fixed << "Triangle count: " << this->tri_count_adj[thread] << " - Execution time : " << this->elp_count_adj[thread].count() << "ms - Speed Up: " << this->elp_count_adj[0].count() / this->elp_count_adj[thread].count() <<
         " - Adjacent List Generation Time: " << this->elp_adj[thread].count() << "ms - Speed Up: " << this->elp_adj[0].count() / this->elp_adj[thread].count() << "\n\n";
 }
 
 
-template<typename EdgeList, typename AdjacentList/*, typename IncidenteMatrix*/>
-inline void UndirectedGraph<EdgeList, AdjacentList/*, IncidenteMatrix*/>::WriteResultsCsv(string results_path)
+template<typename EdgeList, typename AdjacentList>
+inline void UndirectedGraph<EdgeList, AdjacentList>::WriteResultsCsv(string results_path)
 {
 
     ofstream stream;
@@ -171,8 +156,8 @@ inline void UndirectedGraph<EdgeList, AdjacentList/*, IncidenteMatrix*/>::WriteR
 }
 
 
-template<typename EdgeList, typename AdjacentList/*, typename IncidenteMatrix*/>
-inline AdjacentList UndirectedGraph<EdgeList, AdjacentList/*, IncidenteMatrix*/>::GetAdjacentList(const int num_threads)
+template<typename EdgeList, typename AdjacentList>
+inline AdjacentList UndirectedGraph<EdgeList, AdjacentList>::GetAdjacentList(const int num_threads)
 {
 
     AdjacentList adjacent_list(this->n_vertices);
@@ -190,30 +175,23 @@ inline AdjacentList UndirectedGraph<EdgeList, AdjacentList/*, IncidenteMatrix*/>
     
 
     #pragma omp parallel for schedule(dynamic) if(num_threads > 1) num_threads(num_threads) shared(locks, adjacent_list)
-    //#pragma omp parallel for schedule(dynamic) if(num_threads > 1) num_threads(num_threads) shared(adjacent_list)
     for (int i = 0; i < this->n_edges; ++i) {
 
         int v1 = this->edge_list[i].first;
         int v2 = this->edge_list[i].second;
 
 
-        //#pragma omp critical
-        //{
         if (num_threads > 1) omp_set_lock(&locks[v1]);
         auto it1 = lower_bound(adjacent_list[v1].begin(), adjacent_list[v1].end(), v2);
         adjacent_list[v1].insert(it1, v2);
         if (num_threads > 1) omp_unset_lock(&locks[v1]);
-        //}
 
 
-        //#pragma omp critical
-        //{   
-        //if (num_threads > 1) omp_set_lock(&locks[v2]);
-        //auto it2 = lower_bound(adjacent_list[v2].begin(), adjacent_list[v2].end(), v1);
-        //adjacent_list[v2].insert(it2, v1);
-        //if (num_threads > 1) omp_unset_lock(&locks[v2]);
-        //}
-  
+        if (num_threads > 1) omp_set_lock(&locks[v2]);
+        auto it2 = lower_bound(adjacent_list[v2].begin(), adjacent_list[v2].end(), v1);
+        adjacent_list[v2].insert(it2, v1);
+        if (num_threads > 1) omp_unset_lock(&locks[v2]);
+
     }
 
 
@@ -231,35 +209,13 @@ inline AdjacentList UndirectedGraph<EdgeList, AdjacentList/*, IncidenteMatrix*/>
 }
 
 
-/*template<typename EdgeList, typename AdjacentList, typename IncidenteMatrix>
-inline IncidenteMatrix UndirectedGraph<EdgeList, AdjacentList, IncidenteMatrix>::GetIncidenteMatrix(const int num_threads)
-{
-    IncidenteMatrix incidente_matrix(this->n_vertices, vector<bool>(this->n_vertices, false));
-
-    auto start = now();
-
-    #pragma omp parallel for schedule(dynamic) if(num_threads > 1) num_threads(num_threads) //shared(incidente_matrix)
-    for (int i = 0; i < this->n_edges; ++i) {
-        int v1 = this->edge_list[i].first;
-        int v2 = this->edge_list[i].second;
-
-        incidente_matrix[v1][v2] = true;
-        incidente_matrix[v2][v1] = true;
-    }
-
-    auto end = now();
-
-    this->elp_mat[num_threads - 1] = (end - start);
-
-    return incidente_matrix;
-}*/
 
 
-vector<UndirectedGraph<EdgeList, AdjacentList/*, IncidenteMatrix*/>> ReadFromDirectory(string path) {
-    vector<UndirectedGraph<EdgeList, AdjacentList/*, IncidenteMatrix*/>> graphs_list;
+vector<UndirectedGraph<EdgeList, AdjacentList>> ReadFromDirectory(string path) {
+    vector<UndirectedGraph<EdgeList, AdjacentList>> graphs_list;
 
     for (const auto& entry : filesystem::directory_iterator(path))
-        graphs_list.push_back(UndirectedGraph<EdgeList, AdjacentList/*, IncidenteMatrix*/>(entry));
+        graphs_list.push_back(UndirectedGraph<EdgeList, AdjacentList>(entry));
 
     return graphs_list;
 

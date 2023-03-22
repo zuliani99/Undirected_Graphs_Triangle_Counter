@@ -4,26 +4,20 @@
 
 constexpr auto MAX_THREADS = 20;
 
-void RunTriangleCounter(vector<UndirectedGraph<EdgeList, AdjacentList/*, IncidenteMatrix*/>> graphs_vector, string results_path) {
+void RunTriangleCounter(vector<UndirectedGraph<EdgeList, AdjacentList>> graphs_vector, string results_path) {
     for (auto& graph : graphs_vector) {
         cout << "\n";
         graph.printProprieties();
 
         cout << "Number of available cores: " << thread::hardware_concurrency() << "\n\n";
 
-        //cout << "SEQUENTIAL EXECUTION ...\n";
-        //graph.GetAdjacentList(0);
-        //graph.SequentialTriangleCounter();
-        //graph.GetResultByThread(0);
-
-        for (int threads = 0; threads < MAX_THREADS; threads++) { // untill 20 threads
+        for (int threads = 0; threads < MAX_THREADS; threads++) {
 
             if (threads == 0)
                 cout << "SEQUENTIAL EXECUTION ...\n";
             else 
                 cout << "PARALLEL EXECUTION WITH " << threads + 1 << " THREADS ...\n";
             graph.TriangleCounter(graph.GetAdjacentList(threads + 1), threads + 1);
-            //graph.TriangleCounter(graph.GetIncidenteMatrix(threads + 1), threads + 1);
             graph.GetResultByThread(threads);
         }
 
@@ -46,8 +40,8 @@ int main() {
 
     bool newer_graph = false;
 
-    //cout << "Do you want to generate newer random graphs? (0/1) ";
-    //cin >> newer_graph;
+    cout << "Do you want to generate newer random graphs? (0/1) ";
+    cin >> newer_graph;
 
     if (newer_graph != 0 && newer_graph != 1)
         throw std::invalid_argument("Please insert correct input");
