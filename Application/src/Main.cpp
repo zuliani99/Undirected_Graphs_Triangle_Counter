@@ -4,7 +4,7 @@
 
 constexpr auto MAX_THREADS = 20;
 
-void RunTriangleCounter(vector<UndirectedGraph<EdgeList, AdjacentList>> graphs_vector, string results_path) {
+void RunTriangleCounter(vector<UndirectedGraph<EdgeList, AdjacentList/*, IncidenteMatrix*/>> graphs_vector, string results_path) {
     for (auto& graph : graphs_vector) {
         cout << "\n";
         graph.printProprieties();
@@ -23,6 +23,7 @@ void RunTriangleCounter(vector<UndirectedGraph<EdgeList, AdjacentList>> graphs_v
             else 
                 cout << "PARALLEL EXECUTION WITH " << threads + 1 << " THREADS ...\n";
             graph.TriangleCounter(graph.GetAdjacentList(threads + 1), threads + 1);
+            //graph.TriangleCounter(graph.GetIncidenteMatrix(threads + 1), threads + 1);
             graph.GetResultByThread(threads);
         }
 
@@ -79,8 +80,8 @@ int main() {
     stream << "name,n_edges,n_vertices,density,threads,n_triangles,elapsed_triangle_count,speed_up_traingle_count,elapsed_adjacent_list,speed_up_adjacent_list\n";
     stream.close();
 
-    //RunGraphsraphs(random_datasets_path, results_path);
-    RunGraphs(standford_datasets_path, results_path);
+    RunGraphs(random_datasets_path, results_path);
+    //RunGraphs(standford_datasets_path, results_path);
 
     return 0;
 }

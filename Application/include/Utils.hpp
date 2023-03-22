@@ -23,12 +23,10 @@ using Duration = std::chrono::duration<double, milli>;
 static std::mt19937 prng{ std::random_device{}() };
 using Distribution = std::uniform_int_distribution<int>;
 
-using AdjacentList = unordered_map<int, vector<int>>;
-using IncidenteMatrix = vector<vector<bool>>;
+using AdjacentList = vector<vector<int>>;
+//using IncidenteMatrix = vector<vector<bool>>;
 using EdgeList = vector<pair<int, int>>;
 
-
-//size_t intersectionLength(vector<int>* v1, vector<int>* v2)
 
 size_t intersectionLength(vector<int>& v1, vector<int>& v2)
 {
@@ -69,7 +67,8 @@ void GenerateAndWriteRandomGraph(string path, int n_vertices, int n_edges) {
             first = random_vertes(prng);
             second = random_vertes(prng);
         } while (first == second && edges.end() == find_if(edges.begin(), edges.end(),
-            [&first, &second](const pair<int, int>& element) { return element.first == first && element.second == second; })); 
+           [&first, &second](const pair<int, int>& element) { return (element.first == first && element.second == second) ||
+            (element.first == second && element.second == first); }));
 
         edges.push_back(make_pair(first, second));
 
@@ -85,14 +84,14 @@ string ReturnResultPath() {
 
     stringstream results_path;
 
-    /*time_t curtime;
+    time_t curtime;
     time(&curtime);
-    string ts = string(ctime(&curtime));*/
+    string ts = string(ctime(&curtime));
 
-    time_t result = time(NULL);
+    /*time_t result = time(NULL);
     char timestamp[26];
     ctime_s(timestamp, sizeof timestamp, &result);
-    string ts = string(timestamp);
+    string ts = string(timestamp);*/
 
     ts.erase(remove(ts.begin(), ts.end(), '\n'), ts.cend());
 
@@ -117,5 +116,18 @@ void DeleteExistingDatasets(string path) {
     }
 }
 
+void merge_map(unordered_map<int, vector<int>>& inout, unordered_map<int, vector<int>>& in) {
+    for (auto initer = in.begin(), outiter = inout.begin(); initer != in.end(); ++initer, ++outiter) {
+        vector<int> res;
+        std::merge(initer->second.begin(), initer->second.end(),
+            outiter->second.begin(), outiter->second.end(),
+            back_inserter(res));
+
+        auto pte = unique(res.begin(), res.end());
+        res.erase(pte, res.end());
+
+        outiter->second = res;
+    }
+}
 
 #endif
