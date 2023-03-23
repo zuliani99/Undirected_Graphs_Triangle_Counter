@@ -77,6 +77,13 @@ void GenerateAndWriteSparseRandomGraph(string path, int n_vertices, int n_edges)
 }
 
 
+// Auxiliary function for the function bellow
+bool aux_GenerateAndWriteDenseRandomGraph (pair<int, int> p) {
+	return (p.first == 0 && p.second != 0) ||
+        	(p != 0 && p.second == 0) ||
+            (p.first != 0 && p.second != 0);
+}
+
 
 // Function that given the string path, the number of vertices and the number of edges, generate a random edges list representing a dense undirected graph
 void GenerateAndWriteDenseRandomGraph(string path, int n_vertices, int n_edges) {
@@ -102,9 +109,7 @@ void GenerateAndWriteDenseRandomGraph(string path, int n_vertices, int n_edges) 
     // Marking random edges as deleted
     while (del < to_del) {
         idx_del = random_edges(prng);
-        if ((edges[idx_del].first == 0 && edges[idx_del].second != 0) ||
-            (edges[idx_del].first != 0 && edges[idx_del].second == 0) ||
-            (edges[idx_del].first != 0 && edges[idx_del].second != 0)) {
+        if (aux_GenerateAndWriteDenseRandomGraph(edges[idx_del])) {
             edges[idx_del].first = 0;
             edges[idx_del].second = 0;
             del += 1;
@@ -113,9 +118,7 @@ void GenerateAndWriteDenseRandomGraph(string path, int n_vertices, int n_edges) 
 
     // Write only the valid edges in the csv file
     for (auto& edg : edges) {
-        if ((edg.first == 0 && edg.second != 0) ||
-            (edg.first != 0 && edg.second == 0) ||
-            (edg.first != 0 && edg.second != 0))
+        if (aux_GenerateAndWriteDenseRandomGraph(edg))
             graph << edg.first << "," << edg.second << "\n";
 
     }
@@ -132,14 +135,9 @@ string ReturnResultPath() {
 
     stringstream results_path;
 
-    /*time_t curtime;
+    time_t curtime;
     time(&curtime);
-    string ts = string(ctime(&curtime));*/
-
-    time_t result = time(NULL);
-    char timestamp[26];
-    ctime_s(timestamp, sizeof timestamp, &result);
-    string ts = string(timestamp);
+    string ts = string(ctime(&curtime));
 
     ts.erase(remove(ts.begin(), ts.end(), '\n'), ts.cend());
 
