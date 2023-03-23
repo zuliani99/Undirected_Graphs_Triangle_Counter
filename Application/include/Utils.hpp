@@ -15,8 +15,11 @@
 #include <sstream>
 #include <filesystem>
 #include <cstdio>
+#include <omp.h>
+# define CHUNK 100
 
 using namespace std;
+
 
 static auto now = std::chrono::high_resolution_clock::now;
 using Duration = std::chrono::duration<double, milli>;
@@ -38,19 +41,44 @@ size_t intersectionLength(vector<int>& v1, vector<int>& v2)
 
 void GenerateAndWriteRandomGraph(string path, int n_vertices, int n_edges) {
     string name = "V_" + to_string(n_vertices) + "-E_" + to_string(n_edges);
-    int first, second;
-    vector<pair<int, int>> edges(n_edges);
+    int first, second, max_threads = thread::hardware_concurrency();
+	int delete_each = (n_vertices*(n_vertices-1) - n_edges) / (n_vertices*(n_vertices-1) / CHUNK);
+    //vector<pair<int, int>> edges(n_edges);
+    vector<pair<int, int>> edges(n_vertices*(n_vertices-1));
 
     ofstream graph;
     graph.open(path + "/" + name + ".csv");
 
-    Distribution random_vertes(0, n_vertices - 1);
+    //Distribution random_vertes(0, n_vertices - 1);
 
     cout << "Generating a random undirected graph with " << n_vertices << " vertices and " << n_edges << " edges ...";
 
 	graph << n_vertices << "\n";
 
-    for (int edge = 0; edge < n_edges; ++edge) {
+	for(int i = 0; i < n_vertices; ++i) {
+		for(int j = 0; j < n_vertices; ++j){
+			if(i > j) edges.push_back(make_pair(i, j));
+		}
+	}
+
+	#pragma omp parallel for schedule(dynamic, CHUNK) num_threads(max_threads) private(delete_each) shared(edges)
+	for(int idx = 0; idx < edges.size(); ++idx) {
+    	Distribution random_edges(idx, idx + CHUNK);
+
+		for(int del = 0; del < delete_each; ++del){
+			int idx_del;
+			do {
+				idx_del = random_edges(prng);
+			}while(edges[idx_del].first == 0 && edges[idx_del].second == 0);
+			edges[idx_del].first == 0;
+			edges[idx_del].second == 0;
+		}
+	}
+
+	edges.erase(remove(edges.begin(), edges.end(), make_pair(0, 0)), edges.end());
+
+
+    /*for (int edge = 0; edge < n_edges; ++edge) {
         do {
             first = random_vertes(prng);
             second = random_vertes(prng);
@@ -61,7 +89,7 @@ void GenerateAndWriteRandomGraph(string path, int n_vertices, int n_edges) {
         edges.push_back(make_pair(first, second));
 
         graph << first << "," << second << "\n";
-    }
+    }*/
 
     graph.close();
     cout << " DONE\n";

@@ -67,15 +67,15 @@ int main() {
         }
     }
 
-    results_path = ReturnResultPath();
+    /*results_path = ReturnResultPath();
 
     fstream stream;
     stream.open(results_path, std::ios::out | std::ios::app);
     stream << "name,n_edges,n_vertices,density,threads,n_triangles,elapsed_triangle_count,speed_up_traingle_count,elapsed_adjacent_list,speed_up_adjacent_list\n";
     stream.close();
 
-    //RunGraphs(random_datasets_path, results_path);
-    RunGraphs(standford_datasets_path, results_path);
+    RunGraphs(random_datasets_path, results_path);
+    RunGraphs(standford_datasets_path, results_path);*/
 
     return 0;
 }

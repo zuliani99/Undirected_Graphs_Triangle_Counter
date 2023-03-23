@@ -3,8 +3,6 @@
 
 #include "Utils.hpp"
 #include <unordered_map>
-#include <omp.h>
-
 
 
 template<typename EdgeList, typename AdjacentList>
