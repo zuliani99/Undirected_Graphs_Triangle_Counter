@@ -16,7 +16,7 @@ void RunTriangleCounter(vector<UndirectedGraph<EdgeList, AdjacentList>> graphs_v
 
             if (threads == 0)
                 cout << "SEQUENTIAL EXECUTION ...\n";
-            else 
+            else
                 cout << "PARALLEL EXECUTION WITH " << threads + 1 << " THREADS ...\n";
             graph.TriangleCounter(graph.GetAdjacentList(threads + 1), threads + 1);
             graph.GetResultByThread(threads);
@@ -27,6 +27,7 @@ void RunTriangleCounter(vector<UndirectedGraph<EdgeList, AdjacentList>> graphs_v
         cout << "\n\n";
     }
 }
+
 
 
 int main() {
@@ -43,13 +44,14 @@ int main() {
         throw std::invalid_argument("Please insert correct input");
 
     if (newer_graph) {
-		// Define the range of random graph generation
-        vector<pair<int, int>> step_vertices = { {10, 100}, {101, 1000}, {3001, 4100} };
+        // Define the range of random graph generation
+        vector<pair<int, int>> rages_vector = { {10, 100}, {101, 1000}, {3001, 4100} };
 
         DeleteExistingDatasets(random_datasets_path);
 
-		for(auto& vert : step_vertices) {
-			Distribution vertex_dist(vert.first, vert.second);
+        // Create the random graphs for the given vector of ranges
+        for (auto& ranges : rages_vector) {
+            Distribution vertex_dist(ranges.first, ranges.second);
             int random_n_vertices = vertex_dist(prng);
 
             Distribution sparse_dist((random_n_vertices - 1), random_n_vertices * (random_n_vertices - 1) / 4);
@@ -57,7 +59,7 @@ int main() {
 
             GenerateAndWriteSparseRandomGraph(random_datasets_path, random_n_vertices, sparse_dist(prng));
             GenerateAndWriteDenseRandomGraph(random_datasets_path, random_n_vertices, dense_dist(prng));
-		}
+        }
 
     }
 
@@ -73,4 +75,3 @@ int main() {
 
     return 0;
 }
-
