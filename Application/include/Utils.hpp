@@ -31,7 +31,7 @@ using EdgeList = vector<pair<int, int>>;
 
 
 
-// Function that given two adjacent lists return the lenght of the intersection between the two
+// Function that given two adjacent lists return the length of the intersection between the two
 size_t intersectionLength(vector<int>& adj_l1, vector<int>& adj_l2)
 {
     vector<int> intersection;
@@ -41,7 +41,7 @@ size_t intersectionLength(vector<int>& adj_l1, vector<int>& adj_l2)
 
 
 
-// Function that given the string path, the number of vertices and the number of edges, generate a random edges list representing a sparse undirected graph
+// Function that given the path string, the number of vertices and the number of edges, generate a random edges list representing a sparse undirected graph
 void GenerateAndWriteSparseRandomGraph(string path, int n_vertices, int n_edges) {
     string name = "V_" + to_string(n_vertices) + "-E_" + to_string(n_edges);
     int first, second;
@@ -77,15 +77,15 @@ void GenerateAndWriteSparseRandomGraph(string path, int n_vertices, int n_edges)
 }
 
 
-// Auxiliary function for the function bellow
+// Auxiliary function for the function below
 bool aux_GenerateAndWriteDenseRandomGraph (pair<int, int> p) {
 	return (p.first == 0 && p.second != 0) ||
-        	(p != 0 && p.second == 0) ||
+        	(p.first != 0 && p.second == 0) ||
             (p.first != 0 && p.second != 0);
 }
 
 
-// Function that given the string path, the number of vertices and the number of edges, generate a random edges list representing a dense undirected graph
+// Function that given the path string, the number of vertices and the number of edges, generate a random edges list representing a sparse undirected graph
 void GenerateAndWriteDenseRandomGraph(string path, int n_vertices, int n_edges) {
     string name = "V_" + to_string(n_vertices) + "-E_" + to_string(n_edges);
     int first = 0, second = 0, del = 0, max_threads = thread::hardware_concurrency(), to_del = ((n_vertices * (n_vertices - 1)) / 2) - n_edges, idx_del = 0;
@@ -150,9 +150,7 @@ string ReturnResultPath() {
 
 
 
-// Function to delete the existing random graphs
-void DeleteExistingDatasets(string path) {
-    for (const auto& entry : filesystem::directory_iterator(path)) {
+// Function to return the path string of the result csv file    for (const auto& entry : filesystem::directory_iterator(path)) {
         if (entry.is_regular_file()) {
             string path_name = entry.path().generic_string();
             string name = path_name;

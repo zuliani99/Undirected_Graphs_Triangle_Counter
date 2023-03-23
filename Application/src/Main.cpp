@@ -4,7 +4,7 @@
 
 constexpr auto MAX_THREADS = 20; // Define the maximum number of thread to run
 
-// Fucntion that made the whole computation start
+// Function that made the whole computation start
 void RunTriangleCounter(vector<UndirectedGraph<EdgeList, AdjacentList>> graphs_vector, string results_path) {
     for (auto& graph : graphs_vector) {
         cout << "\n";

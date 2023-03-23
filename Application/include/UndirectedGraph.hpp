@@ -82,7 +82,7 @@ public:
 };
 
 
-// Function to print useful graph proprieties
+// Function to print useful graph properties
 template<typename EdgeList, typename AdjacentList>
 inline void UndirectedGraph<EdgeList, AdjacentList>::printProprieties()
 {
@@ -105,7 +105,8 @@ inline void UndirectedGraph<EdgeList, AdjacentList>::TriangleCounter(AdjacentLis
     auto end = now();
 
     if (sum > 3) sum /= 3;
-
+	
+	// Saving some statistics
     this->elp_count_adj[num_threads - 1] = (end - start);
     this->tri_count_adj[num_threads - 1] = sum;
 
@@ -113,7 +114,7 @@ inline void UndirectedGraph<EdgeList, AdjacentList>::TriangleCounter(AdjacentLis
 
 
 
-// Function to sprint in std output the result of a given execution with a given number of threads
+// Function to print in std output the result of a given execution with a given number of threads
 template<typename EdgeList, typename AdjacentList>
 inline void UndirectedGraph<EdgeList, AdjacentList>::GetResultByThread(const int thread)
 {
@@ -144,7 +145,7 @@ inline void UndirectedGraph<EdgeList, AdjacentList>::WriteResultsCsv(string resu
 
 
 
-// Function that given the number of threads run in parallel the creation of the adjacent list for the actual UndirectedGraph object
+// Function that given the number of threads run in parallel the creation of the adjacency list for the actual UndirectedGraph object
 template<typename EdgeList, typename AdjacentList>
 inline AdjacentList UndirectedGraph<EdgeList, AdjacentList>::GetAdjacentList(const int num_threads)
 {
@@ -160,7 +161,7 @@ inline AdjacentList UndirectedGraph<EdgeList, AdjacentList>::GetAdjacentList(con
     if (num_threads > 1)
 #pragma omp parallel for schedule(dynamic) num_threads(num_threads)
         for (int i = 0; i < locks.size(); ++i)
-            omp_init_lock(&locks[i]); // Initialize all the locks, each corresponding for as single adjacent list
+            omp_init_lock(&locks[i]); // Initialize all the locks, each corresponding for as single adjacency list
 
 
     // Read the edge_list and populate the adjacent list
@@ -174,13 +175,13 @@ inline AdjacentList UndirectedGraph<EdgeList, AdjacentList>::GetAdjacentList(con
         if (num_threads > 1) omp_set_lock(&locks[v1]);
         auto it1 = lower_bound(adjacent_list[v1].begin(), adjacent_list[v1].end(), v2);
         adjacent_list[v1].insert(it1, v2);
-        if (num_threads > 1) omp_unset_lock(&locks[v1]); // Finishing the insertion we release the lock for the corresponding adjacent list
+        if (num_threads > 1) omp_unset_lock(&locks[v1]); // When insertion is finished we release the lock for the corresponding adjacency list
 
         // In case the number of threads is greater then 1 we lock the corresponding adjacent list in position v2
         if (num_threads > 1) omp_set_lock(&locks[v2]);
         auto it2 = lower_bound(adjacent_list[v2].begin(), adjacent_list[v2].end(), v1);
         adjacent_list[v2].insert(it2, v1);
-        if (num_threads > 1) omp_unset_lock(&locks[v2]); // Finishing the insertion we release the lock for the corresponding adjacent list
+        if (num_threads > 1) omp_unset_lock(&locks[v2]); // When insertion is finished we release the lock for the corresponding adjacency list
 
     }
 
@@ -188,7 +189,7 @@ inline AdjacentList UndirectedGraph<EdgeList, AdjacentList>::GetAdjacentList(con
     if (num_threads > 1)
 #pragma omp parallel for schedule(dynamic) num_threads(num_threads)
         for (int i = 0; i < locks.size(); ++i)
-            omp_destroy_lock(&locks[i]); // Destroy all the locks, each corresponding for as single adjacent list
+            omp_destroy_lock(&locks[i]); // Destroy all the locks, each corresponding for as single adjacency list
 
 
     auto end = now();
