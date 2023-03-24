@@ -59,17 +59,17 @@ public:
 
                     if (n_row == 0) {
                         this->n_vertices = stoi(row[0]);
+                        n_row += 1;
                     }
                     else {
                         first = stoi(row[0]);
                         second = stoi(row[1]);
-						
-						if (find(this->edges_list.begin(), this->edges_list.end(), make_pair(second, first)) != this->edges_list.end()) {
-							this->edges_list.push_back(make_pair(first, second));
-							n_row += 1;
-							
-						}
-						
+
+                        if (find(this->edges_list.begin(), this->edges_list.end(), make_pair(second, first)) == this->edges_list.end()) {
+                            this->edges_list.push_back(make_pair(first, second));
+                            n_row += 1;
+                        }
+
                     }
 
                 }
