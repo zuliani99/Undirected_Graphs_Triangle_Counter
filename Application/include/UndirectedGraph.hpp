@@ -45,7 +45,7 @@ public:
             cout << "Reading file: " << this->name << " ...";
 
             ifstream file(entry.path(), ios::in);
-            if (this->name.find(string("/random_graphs/")) != std::string::npos) random_graph = true;
+            if (this->name.find(string("random_graphs/")) != string::npos) random_graph = true;
 
             if (file.is_open()) {
                 while (getline(file, line)) {
@@ -107,8 +107,8 @@ inline void UndirectedGraph<EdgeList, AdjacencyList>::TriangleCounter(AdjacencyL
     size_t sum = 0;
 
     auto start = now();
-
-#pragma omp parallel for schedule(dynamic) if(num_threads>1) num_threads(num_threads) reduction(+:sum)
+//
+#pragma omp parallel for schedule(dynamic) if(num_threads > 1) num_threads(num_threads) reduction(+:sum)
     for (int i = 0; i < this->n_edges; ++i)
         sum += intersectionLength(adjacency_list[this->edges_list[i].first], adjacency_list[this->edges_list[i].second]);
 
@@ -140,13 +140,10 @@ inline void UndirectedGraph<EdgeList, AdjacencyList>::WriteResultsCsv(string res
 {
 
     ofstream stream;
-    stream.open(results_path, std::ios::out | std::ios::app);
+    stream.open(results_path, ios::out | ios::app);
     for (int i = 0; i < this->elp_count_adj.size(); ++i) {
-                    //"name,             n_edges,                  n_vertices,            density,                threads
         stream << this->name << "," << this->n_edges << "," << this->n_vertices << "," << this->density << "," << (i + 1) << "," <<
-            //    n_triangles,                 elapsed_triangle_count,                                   speed_up_traingle_count
             this->tri_count_adj[i] << "," << this->elp_count_adj[i].count() << "," << this->elp_count_adj[0].count() / this->elp_count_adj[i].count() << "," <<
-            //elapsed_adjacency_list,                         speed_up_adjacency_list\n";
             this->elp_adj[i].count() << "," << this->elp_adj[0].count() / this->elp_adj[i].count() << "\n";
     }
 
@@ -173,7 +170,7 @@ inline AdjacencyList UndirectedGraph<EdgeList, AdjacencyList>::GetAdjacencyList(
         for (int i = 0; i < locks.size(); ++i)
             omp_init_lock(&locks[i]); // Initialize all the locks, each corresponding for as single adjacency list
 
-
+//
     // Read the edges_list and populate the adjacent list
 #pragma omp parallel for schedule(dynamic) if(num_threads > 1) num_threads(num_threads) shared(locks, adjacency_list)
     for (int i = 0; i < this->n_edges; ++i) {
