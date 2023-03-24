@@ -76,7 +76,7 @@ public:
             }
             file.close();
 
-            this->n_edges = n_row;
+            this->n_edges = n_row - 1;
             this->density = static_cast<double>((2 * this->n_edges)) / (this->n_vertices * (this->n_vertices - 1));
 
             cout << "  DONE\n";
