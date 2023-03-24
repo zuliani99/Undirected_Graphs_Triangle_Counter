@@ -20,13 +20,13 @@
 using namespace std;
 
 
-static auto now = std::chrono::high_resolution_clock::now;
-using Duration = std::chrono::duration<double, milli>;
-static std::mt19937 prng{ std::random_device{}() };
-using Distribution = std::uniform_int_distribution<int>;
+static auto now = chrono::high_resolution_clock::now;
+using Duration = chrono::duration<double, milli>;
+static mt19937 prng{ random_device{}() };
+using Distribution = uniform_int_distribution<int>;
 
 // Defining alias for the two useful data structures
-using AdjacentList = vector<vector<int>>;
+using AdjacencyList = vector<vector<int>>;
 using EdgeList = vector<pair<int, int>>;
 
 
@@ -45,7 +45,7 @@ size_t intersectionLength(vector<int>& adj_l1, vector<int>& adj_l2)
 void GenerateAndWriteSparseRandomGraph(string path, int n_vertices, int n_edges) {
     string name = "V_" + to_string(n_vertices) + "-E_" + to_string(n_edges);
     int first, second;
-    vector<pair<int, int>> edges;
+    vector<pair<int, int>> edges_list;
     ofstream graph;
     Distribution random_vertes(0, n_vertices - 1);
 
@@ -62,12 +62,12 @@ void GenerateAndWriteSparseRandomGraph(string path, int n_vertices, int n_edges)
         do {
             first = random_vertes(prng);
             second = random_vertes(prng);
-        } while (first == second || edges.end() != find_if(edges.begin(), edges.end(),
+        } while (first == second || edges_list.end() != find_if(edges_list.begin(), edges_list.end(),
             [&first, &second](const pair<int, int>& element) { return (element.first == first && element.second == second) ||
             (element.first == second && element.second == first); }));
         // We insert the newer edge only if it meets the above conditions
 
-        edges.push_back(make_pair(first, second));
+        edges_list.push_back(make_pair(first, second));
 
         graph << first << "," << second << "\n";
     }
@@ -89,7 +89,7 @@ bool aux_GenerateAndWriteDenseRandomGraph (pair<int, int> p) {
 void GenerateAndWriteDenseRandomGraph(string path, int n_vertices, int n_edges) {
     string name = "V_" + to_string(n_vertices) + "-E_" + to_string(n_edges);
     int first = 0, second = 0, del = 0, max_threads = thread::hardware_concurrency(), to_del = ((n_vertices * (n_vertices - 1)) / 2) - n_edges, idx_del = 0;
-    vector<pair<int, int>> edges;
+    vector<pair<int, int>> edges_list;
     Distribution random_edges(0, n_edges - 1);
     ofstream graph;
 
@@ -102,24 +102,24 @@ void GenerateAndWriteDenseRandomGraph(string path, int n_vertices, int n_edges) 
     // Generating all the possible combination of edges in a single direction
     for (int i = 0; i < n_vertices; ++i) {
         for (int j = 0; j < n_vertices; ++j) {
-            if (i < j) edges.push_back(make_pair(i, j));
+            if (i < j) edges_list.push_back(make_pair(i, j));
         }
     }
 
     // Marking random edges as deleted
     while (del < to_del) {
         idx_del = random_edges(prng);
-        if (aux_GenerateAndWriteDenseRandomGraph(edges[idx_del])) {
-            edges[idx_del].first = 0;
-            edges[idx_del].second = 0;
+        if (aux_GenerateAndWriteDenseRandomGraph(edges_list[idx_del])) {
+            edges_list[idx_del].first = 0;
+            edges_list[idx_del].second = 0;
             del += 1;
         }
     }
 
     // Write only the valid edges in the csv file
-    for (auto& edg : edges) {
-        if (aux_GenerateAndWriteDenseRandomGraph(edg))
-            graph << edg.first << "," << edg.second << "\n";
+    for (auto& edge : edges_list) {
+        if (aux_GenerateAndWriteDenseRandomGraph(edge))
+            graph << edge.first << "," << edge.second << "\n";
 
     }
 
@@ -150,7 +150,9 @@ string ReturnResultPath() {
 
 
 
-// Function to return the path string of the result csv file    for (const auto& entry : filesystem::directory_iterator(path)) {
+// Function to return the path string of the result csv file
+void DeleteExistingDatasets(string path) {
+	for (const auto& entry : filesystem::directory_iterator(path)) {
         if (entry.is_regular_file()) {
             string path_name = entry.path().generic_string();
             string name = path_name;

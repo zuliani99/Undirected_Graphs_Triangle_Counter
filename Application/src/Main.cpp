@@ -5,7 +5,7 @@
 constexpr auto MAX_THREADS = 20; // Define the maximum number of thread to run
 
 // Function that made the whole computation start
-void RunTriangleCounter(vector<UndirectedGraph<EdgeList, AdjacentList>> graphs_vector, string results_path) {
+void RunTriangleCounter(vector<UndirectedGraph<EdgeList, AdjacencyList>> graphs_vector, string results_path) {
     for (auto& graph : graphs_vector) {
         cout << "\n";
         graph.printProprieties();
@@ -18,7 +18,7 @@ void RunTriangleCounter(vector<UndirectedGraph<EdgeList, AdjacentList>> graphs_v
                 cout << "SEQUENTIAL EXECUTION ...\n";
             else
                 cout << "PARALLEL EXECUTION WITH " << threads + 1 << " THREADS ...\n";
-            graph.TriangleCounter(graph.GetAdjacentList(threads + 1), threads + 1);
+            graph.TriangleCounter(graph.GetAdjacencyList(threads + 1), threads + 1);
             graph.GetResultByThread(threads);
         }
 
@@ -31,7 +31,7 @@ void RunTriangleCounter(vector<UndirectedGraph<EdgeList, AdjacentList>> graphs_v
 
 
 int main() {
-    string standford_datasets_path = "../datasets/standford";
+    string stanford_datasets_path = "../datasets/stanford";
     string random_datasets_path = "../datasets/random_graphs";
     string results_path;
 
@@ -41,7 +41,7 @@ int main() {
     cin >> newer_graph;
 
     if (newer_graph != 0 && newer_graph != 1)
-        throw std::invalid_argument("Please insert correct input");
+        throw invalid_argument("Please insert correct input");
 
     if (newer_graph) {
         // Define the range of random graph generation
@@ -66,11 +66,11 @@ int main() {
     results_path = ReturnResultPath();
 
     fstream stream;
-    stream.open(results_path, std::ios::out | std::ios::app);
-    stream << "name,n_edges,n_vertices,density,threads,n_triangles,elapsed_triangle_count,speed_up_traingle_count,elapsed_adjacent_list,speed_up_adjacent_list\n";
+    stream.open(results_path, ios::out | ios::app);
+    stream << "name,n_edges,n_vertices,density,threads,n_triangles,elapsed_triangle_count,speed_up_traingle_count,elapsed_adjacency_list,speed_up_adjacency_list\n";
     stream.close();
 
-    RunTriangleCounter(ReadFromDirectory(standford_datasets_path), results_path);
+    RunTriangleCounter(ReadFromDirectory(stanford_datasets_path), results_path);
     RunTriangleCounter(ReadFromDirectory(random_datasets_path), results_path);
 
     return 0;
