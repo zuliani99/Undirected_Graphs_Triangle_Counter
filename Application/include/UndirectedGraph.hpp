@@ -37,6 +37,7 @@ public:
             vector<string> row;
             string line, word;
             int n_row = 0;
+            bool random_graph = false;
 
             this->name = entry.path().generic_string();
             this->name.erase(this->name.begin(), this->name.begin() + 11);
@@ -44,7 +45,7 @@ public:
             cout << "Reading file: " << this->name << " ...";
 
             ifstream file(entry.path(), ios::in);
-
+            if (this->name.find(string("/random_graphs/")) != std::string::npos) random_graph = true;
 
             if (file.is_open()) {
                 while (getline(file, line)) {
@@ -65,10 +66,16 @@ public:
                         first = stoi(row[0]);
                         second = stoi(row[1]);
 
-                        if (find(this->edges_list.begin(), this->edges_list.end(), make_pair(second, first)) == this->edges_list.end()) {
+                        if(!random_graph) {
+                            if (find(this->edges_list.begin(), this->edges_list.end(), make_pair(second, first)) == this->edges_list.end()) {
+                                this->edges_list.push_back(make_pair(first, second));
+                                n_row += 1;
+                            }
+                        }else {
                             this->edges_list.push_back(make_pair(first, second));
                             n_row += 1;
                         }
+                        
 
                     }
 
