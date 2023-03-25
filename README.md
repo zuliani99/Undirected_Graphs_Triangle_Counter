@@ -28,10 +28,10 @@ Start the application by typing ```./app```. Next you have only to specify:
 
 During the execution of the benchmark the application will go through these steps for both the Stanford graphs and the radom generated graphs:
 1. Read the .csv file and create the respecitve edegs list
-2. Create the adjacency list from the edge list 
-3. Compute the number of triangle given the edge ad adjacency lists
+2. Create the adjacency list from the edges list 
+3. Compute the number of triangle given the edges and adjacency list
 
-The step **2** and **3** are repeated starting from 1 thread up to 20 threads. Moreover at the end of each run of step 2 and 3 the application will print out usefull statistics, like the number of detected trangle, the elapsed time taken for the triangle count and adjacency list creation procedure and tus also both speedups.
+The step **2** and **3** are repeated starting from 1 thread up to 20 threads. Moreover at the end of each run of step 2 and 3 the application will print out usefull statistics, like the number of detected triangle, the elapsed time taken for the triangle count and adjacency list creation and thus also both speedups.
 
 ## Results
 These result was achived running the application on a HP ElideDesk G1 TW with 8 cores CPU:
