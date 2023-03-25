@@ -21,3 +21,18 @@ g++ -std=c++2a -fopenmp -O3 -o ../bin/app Main.cpp
 ```
 
 The *.exe* file will be inserted into the */app/bin* directory.
+
+## Usage
+Start the application by typing ```./app```. Next you have only to specify:
+* If tou want to override the existing random generated graph and creatig other one:  _0_ or _1_
+
+During the execution of the becnhmarck the application will run the TriangleCounter first on the Stanford graph by first reading the .csv file and creating the respecitve edegs list and the for each graph and for each thread it run the actual TriangleCounter. Next the same thing is done regarding the random gebnerated graphs.
+
+Screen shot describing the output of the application:
+
+## Results
+These result was achived running the application on a HP ElideDesk G1 TW with 8 cores CPU:
+### Random Graphs
+![](graphs_result/O3_random.png)
+### Stanford Graphs
+![](graphs_result/O3_stan.png)
