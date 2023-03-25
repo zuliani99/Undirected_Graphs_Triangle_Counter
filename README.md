@@ -32,4 +32,4 @@ Screen shot describing the output of the application:
 
 ## Results
 These result was achived running the application on a HP ElideDesk G1 TW with 8 cores CPU:
-![](summary?plots.png)
+![](summary_plots.png)
