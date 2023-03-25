@@ -107,8 +107,8 @@ inline void UndirectedGraph<EdgeList, AdjacencyList>::TriangleCounter(AdjacencyL
     size_t sum = 0;
 
     auto start = now();
-//
-#pragma omp parallel for schedule(dynamic) if(num_threads > 1) num_threads(num_threads) reduction(+:sum)
+
+#pragma omp parallel for schedule(dynamic) num_threads(num_threads) reduction(+:sum)
     for (int i = 0; i < this->n_edges; ++i)
         sum += intersectionLength(adjacency_list[this->edges_list[i].first], adjacency_list[this->edges_list[i].second]);
 
@@ -170,9 +170,9 @@ inline AdjacencyList UndirectedGraph<EdgeList, AdjacencyList>::GetAdjacencyList(
         for (int i = 0; i < locks.size(); ++i)
             omp_init_lock(&locks[i]); // Initialize all the locks, each corresponding for as single adjacency list
 
-//
+
     // Read the edges_list and populate the adjacent list
-#pragma omp parallel for schedule(dynamic) if(num_threads > 1) num_threads(num_threads) shared(locks, adjacency_list)
+#pragma omp parallel for schedule(dynamic) num_threads(num_threads) shared(locks, adjacency_list)
     for (int i = 0; i < this->n_edges; ++i) {
 
         int v1 = this->edges_list[i].first;
