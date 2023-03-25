@@ -24,11 +24,14 @@ The *.exe* file will be inserted into the */app/bin* directory.
 
 ## Usage
 Start the application by typing ```./app```. Next you have only to specify:
-* If tou want to override the existing random generated graph and creatig other one:  _0_ or _1_
+* If you want to override the existing random generated graph and creatig other one:  _0_ or _1_
 
-During the execution of the becnhmarck the application will run the TriangleCounter first on the Stanford graph by first reading the .csv file and creating the respecitve edegs list and the for each graph and for each thread it run the actual TriangleCounter. Next the same thing is done regarding the random gebnerated graphs.
+During the execution of the benchmark the application will go through these steps for both the Stanford graphs and the radom generated graphs:
+1. Read the .csv file and create the respecitve edegs list
+2. Create the adjacency list from the edge list 
+3. Compute the number of triangle given the edge ad adjacency lists
 
-Screen shot describing the output of the application:
+The step **2** and **3** are repeated starting from 1 thread up to 20 threads. Moreover at the end of each run of step 2 and 3 the application will print out usefull statistics, like the number of detected trangle, the elapsed time taken for the triangle count and adjacency list creation procedure and tus also both speedups.
 
 ## Results
 These result was achived running the application on a HP ElideDesk G1 TW with 8 cores CPU:
