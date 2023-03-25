@@ -32,7 +32,4 @@ Screen shot describing the output of the application:
 
 ## Results
 These result was achived running the application on a HP ElideDesk G1 TW with 8 cores CPU:
-### Random Graphs
-![](graphs_result/O3_random.png)
-### Stanford Graphs
-![](graphs_result/O3_stan.png)
+![](summary?plots.png)
