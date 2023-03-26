@@ -1,4 +1,4 @@
-# Benchmark on Sequential and Parallel Graph Triangle Counter Problem
+# Sequential and Parallel Triangle Counting Algorithm on Undirected Graphs
 Comparison between Sequential and Parallel version of the Graph Triangle Counter problem.
 
 ## Startup
